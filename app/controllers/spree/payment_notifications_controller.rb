@@ -123,7 +123,7 @@ module Spree
 
         # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
         # after the trial period. So we should process an order of exactly the amount paypal has charged.
-        new_order.total = params[:mc_gross]
+        new_order.total = BigDecimal.new(params[:mc_gross])
 
         @subscription.orders << new_order
 
