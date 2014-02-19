@@ -121,6 +121,10 @@ module Spree
         @payment.order = new_order
         @payment.save
 
+        # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
+        # after the trial period. So we should process an order of exactly the amount paypal has charged.
+        new_order.total = params[:mc_gross]
+
         @subscription.orders << new_order
 
         # clone its line_items
