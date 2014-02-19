@@ -1,0 +1,7 @@
+pt:
+  spree:
+    paypal_website_standard: 
+      pay_with_paypal: "Pagar com PayPal"
+      check_out_with_paypal: "Pagamento com PayPal"
+      payment_received: "Obrigado. Recebemos o seu pagamento PayPal. A sua encomenda será expedida brevemente."
+      order_processed_successfully: "Obrigado. A sua encomenda foi processada. Será notificado assim que recebamos o pagamento do PayPal."

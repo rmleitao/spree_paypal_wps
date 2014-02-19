@@ -1,2 +1,3 @@
-SpreePaypalWps::Engine.routes.draw do
+Spree::Core::Engine.routes.draw do
+	resources :payment_notifications, :only => [:create]
 end
