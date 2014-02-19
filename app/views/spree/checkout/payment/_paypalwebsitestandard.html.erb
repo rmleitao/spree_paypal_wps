@@ -25,10 +25,14 @@
       <!-- This should be filled so that the description field, on PayPal pages, doesn't show up as a user input field -->
       <input id="item_name"     name="item_name"      type="hidden" value="<%= subscription_name(@order) %>" />
       
-      <input id="a1"            name="a1"             type="hidden" value="50.00">
+      <!-- Trial period, if applicable -->
+      <% if @order.get_main_variant.first_price && @order.get_main_variant.first_price > 0 %>
+      <input id="a1"            name="a1"             type="hidden" value="<%= @order.get_main_variant.first_price.round(2) %>">
       <input id="p1"            name="p1"             type="hidden" value="1">
       <input id="t1"            name="t1"             type="hidden" value="M">
+      <% end %>
 
+      <!-- Regular subscription data -->
       <input id="a3"            name="a3"             type="hidden" value="<%= @order.total.round(2) %>">
       <input id="p3"            name="p3"             type="hidden" value="1">
       <input id="t3"            name="t3"             type="hidden" value="M">
