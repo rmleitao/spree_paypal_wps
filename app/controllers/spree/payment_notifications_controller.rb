@@ -121,27 +121,6 @@ module Spree
         @payment.order = new_order
         @payment.save
 
-        # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
-        # after the trial period. So we should process an order of exactly the amount paypal has charged.
-        logger.debug "RML trial mc_gross: #{params[:mc_gross]}"
-        logger.debug "RML trial bigdecimal: #{BigDecimal.new(params[:mc_gross])}"
-        logger.debug "RML trial @order.total: #{@order.total}"
-        logger.debug "RML trial @order.total.to_s: #{@order.total.to_s}"
-        logger.debug "RML trial logic test: #{BigDecimal.new(params[:mc_gross]) > @order.total}"
-        if BigDecimal.new(params[:mc_gross]) > @order.total
-          logger.debug "RML trial I'm in!"
-          Spree::Adjustment.create(
-            :label => "Pagamento inicial",
-            :adjustable => new_order,
-            :source => new_order,
-            :order => new_order,
-            :amount => BigDecimal.new(params[:mc_gross]) - new_order.total,
-            :mandatory => true,
-            :eligible => true,
-            :included => true
-          )
-        end
-
         @subscription.orders << new_order
 
         # clone its line_items
@@ -191,6 +170,27 @@ module Spree
               state_callback(:after)
             end
           end
+        end
+
+        # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
+        # after the trial period. So we should process an order of exactly the amount paypal has charged.
+        logger.debug "RML trial mc_gross: #{params[:mc_gross]}"
+        logger.debug "RML trial bigdecimal: #{BigDecimal.new(params[:mc_gross])}"
+        logger.debug "RML trial @order.total: #{@order.total}"
+        logger.debug "RML trial @order.total.to_s: #{@order.total.to_s}"
+        logger.debug "RML trial logic test: #{BigDecimal.new(params[:mc_gross]) > @order.total}"
+        if BigDecimal.new(params[:mc_gross]) > @order.total
+          logger.debug "RML trial I'm in!"
+          Spree::Adjustment.create(
+            :label => "Pagamento inicial",
+            :adjustable => new_order,
+            :source => new_order,
+            :order => new_order,
+            :amount => BigDecimal.new(params[:mc_gross]) - new_order.total,
+            :mandatory => true,
+            :eligible => true,
+            :included => true
+          )
         end
 
         # when the order is completed, a trigger will automatically be called to consume user credits.
