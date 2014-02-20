@@ -131,7 +131,7 @@ module Spree
         if BigDecimal.new(params[:mc_gross]) > @order.total
           logger.debug "RML trial I'm in!"
           Spree::Adjustment.create(
-            :label => "Pagamento inicial"
+            :label => "Pagamento inicial",
             :adjustable => new_order,
             :source => new_order,
             :order => new_order,

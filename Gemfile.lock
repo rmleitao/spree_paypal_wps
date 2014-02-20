@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    spree_paypal_wps (0.0.1)
+    spree_paypal_wps (0.0.6)
       rails (~> 4.0.2)
       spree_core (~> 2.1.4.beta)
 
