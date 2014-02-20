@@ -123,18 +123,19 @@ module Spree
 
         # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
         # after the trial period. So we should process an order of exactly the amount paypal has charged.
-        # if BigDecimal.new(params[:mc_gross]) > @order.total
-        #   Spree::Adjustment.create(
-        #     :adjustable => new_order,
-        #     :source => new_order,
-        #     :order => new_order,
-        #     :amount => BigDecimal.new("38.00") - new_order.total,
-        #     :mandatory => true,
-        #     :eligible => true,
-        #     :included => true
-        #   )
-        #   new_order.create_adjustment("Encomenda Inicial", new_order, calculable, true)
-        # end
+        if BigDecimal.new(params[:mc_gross]) > @order.total
+          Spree::Adjustment.create(
+            :label => "Pagamento inicial"
+            :adjustable => new_order,
+            :source => new_order,
+            :order => new_order,
+            :amount => BigDecimal.new(params[:mc_gross]) - new_order.total,
+            :mandatory => true,
+            :eligible => true,
+            :included => true
+          )
+          new_order.create_adjustment("Encomenda Inicial", new_order, calculable, true)
+        end
 
         @subscription.orders << new_order
 
