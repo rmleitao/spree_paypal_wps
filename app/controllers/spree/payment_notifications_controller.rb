@@ -123,7 +123,13 @@ module Spree
 
         # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
         # after the trial period. So we should process an order of exactly the amount paypal has charged.
+        logger.debug "RML trial mc_gross: #{params[:mc_gross]}"
+        logger.debug "RML trial bigdecimal: #{BigDecimal.new(params[:mc_gross])}"
+        logger.debug "RML trial @order.total: #{@order.total}"
+        logger.debug "RML trial @order.total.to_s: #{@order.total.to_s}"
+        logger.debug "RML trial logic test: #{BigDecimal.new(params[:mc_gross]) > @order.total}"
         if BigDecimal.new(params[:mc_gross]) > @order.total
+          logger.debug "RML trial I'm in!"
           Spree::Adjustment.create(
             :label => "Pagamento inicial"
             :adjustable => new_order,
@@ -134,7 +140,6 @@ module Spree
             :eligible => true,
             :included => true
           )
-          new_order.create_adjustment("Encomenda Inicial", new_order, calculable, true)
         end
 
         @subscription.orders << new_order
