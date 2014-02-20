@@ -18,7 +18,12 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
 
   s.add_dependency "rails", "~> 4.0.2"
-  s.add_dependency 'spree_core', '~> 2.1.4.beta'
+  spree_version = '~> 2.1.0'
+  s.add_dependency 'spree_api', spree_version
+  s.add_dependency 'spree_core', spree_version
+  s.add_dependency 'spree_frontend', spree_version
+  s.add_dependency 'spree_backend', spree_version
+  s.add_development_dependency 'spree_sample', spree_version
 
   s.add_development_dependency "sqlite3"
 end
