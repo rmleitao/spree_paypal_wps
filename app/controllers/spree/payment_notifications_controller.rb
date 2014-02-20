@@ -124,9 +124,28 @@ module Spree
         @subscription.orders << new_order
 
         # clone its line_items
-        @order.line_items.each do |line_item|
-          new_line_item = line_item.dup
-          new_order.line_items << new_line_item
+        # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
+        # after the trial period. So we should add that specific product to the order.
+        if BigDecimal.new(params[:mc_gross]) > @order.total
+          taxon = Spree::Taxon.find_by_name!("Initial")
+          @products = taxon.products.sort_by! {|u| u.price}
+          # logger.debug "RML trial I'm in!"
+          # Spree::Adjustment.create(
+          #   :label => "Pagamento inicial",
+          #   :adjustable => new_order,
+          #   :source => new_order,
+          #   :order => new_order,
+          #   :amount => BigDecimal.new(params[:mc_gross]) - new_order.total,
+          #   :mandatory => true,
+          #   :eligible => true,
+          #   :included => true
+          # )
+        else
+          # normal case, just copy the original order line items
+          @order.line_items.each do |line_item|
+            new_line_item = line_item.dup
+            new_order.line_items << new_line_item
+          end
         end
 
         # clone its adjustments
@@ -170,27 +189,6 @@ module Spree
               state_callback(:after)
             end
           end
-        end
-
-        # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
-        # after the trial period. So we should process an order of exactly the amount paypal has charged.
-        logger.debug "RML trial mc_gross: #{params[:mc_gross]}"
-        logger.debug "RML trial bigdecimal: #{BigDecimal.new(params[:mc_gross])}"
-        logger.debug "RML trial @order.total: #{@order.total}"
-        logger.debug "RML trial @order.total.to_s: #{@order.total.to_s}"
-        logger.debug "RML trial logic test: #{BigDecimal.new(params[:mc_gross]) > @order.total}"
-        if BigDecimal.new(params[:mc_gross]) > @order.total
-          logger.debug "RML trial I'm in!"
-          Spree::Adjustment.create(
-            :label => "Pagamento inicial",
-            :adjustable => new_order,
-            :source => new_order,
-            :order => new_order,
-            :amount => BigDecimal.new(params[:mc_gross]) - new_order.total,
-            :mandatory => true,
-            :eligible => true,
-            :included => true
-          )
         end
 
         # when the order is completed, a trigger will automatically be called to consume user credits.
