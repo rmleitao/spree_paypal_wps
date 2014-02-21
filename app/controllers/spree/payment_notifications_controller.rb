@@ -133,13 +133,14 @@ module Spree
             new_line_item = line_item.dup
             logger.info "line_item.product.is_main?: #{line_item.product.is_main?}"
             if line_item.product.is_main?
-              logger.info "line_item.variant: #{line_item.variant.id.to_s}"
-              logger.info "line_item.variant.initial_product.variants.first: #{line_item.variant.initial_product.variants.first.id.to_s}"
-              new_line_item.variant = line_item.variant.initial_product.variants.first
+              logger.info "line_item.variant: #{line_item.variant.id.to_s}"              
+              the_variant = Spree::Variant.find_by_sku(line_item.variant.initial_product.sku)
+              logger.info "the_variant: #{the_variant}"
+              new_line_item.variant = the_variant
               logger.info "new_line_item.variant: #{new_line_item.variant.id.to_s}"
             end
             new_order.line_items << new_line_item
-          end          
+          end
         else
           # normal case, just copy the original order line items
           @order.line_items.each do |line_item|
