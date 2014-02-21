@@ -126,11 +126,17 @@ module Spree
         # clone its line_items
         # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
         # after the trial period. So we should add that specific product to the order.
+        logger.info "BigDecimal.new(params[:mc_gross]) > @order.total: #{BigDecimal.new(params[:mc_gross]) > @order.total}"
         if BigDecimal.new(params[:mc_gross]) > @order.total
+          logger.info "Im in."
           @order.line_items.each do |line_item|
             new_line_item = line_item.dup
+            logger.info "line_item.product.is_main?: #{line_item.product.is_main?}"
             if line_item.product.is_main?
-              new_line_item.product = line_item.variant.initial_product
+              logger.info "line_item.variant: #{line_item.variant.id.to_s}"
+              logger.info "line_item.variant.initial_product.variants.first: #{line_item.variant.initial_product.variants.first.id.to_s}"
+              new_line_item.variant = line_item.variant.initial_product.variants.first
+              logger.info "new_line_item.variant: #{new_line_item.variant.id.to_s}"
             end
             new_order.line_items << new_line_item
           end          
