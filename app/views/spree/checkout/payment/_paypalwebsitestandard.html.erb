@@ -27,7 +27,16 @@
       
       <!-- Trial period, if applicable -->
       <% if @order.get_main_variant.first_price && @order.get_main_variant.first_price > 0 %>
-      <input id="a1"            name="a1"             type="hidden" value="<%= @order.get_main_variant.first_price.round(2) %>">
+      <% 
+        extra_amount = BigDecimal.new("0")
+        @order.line_items.each do |li|
+          if li.product.is_extra?
+            extra_amount += li.product.price * li.quantity
+          end
+        end
+        trial_amount = @order.get_main_variant.first_price.round(2) + extra_amount
+      %>
+      <input id="a1"            name="a1"             type="hidden" value="<%= trial_amount.round(2) %>">
       <input id="p1"            name="p1"             type="hidden" value="1">
       <input id="t1"            name="t1"             type="hidden" value="M">
       <% end %>
