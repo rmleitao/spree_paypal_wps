@@ -127,10 +127,10 @@ module Spree
         # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
         # after the trial period. So we should add that specific product to the order.
         if BigDecimal.new(params[:mc_gross]) > @order.total
-          new_order.line_items.each do |line_item|
+          @order.line_items.each do |line_item|
             new_line_item = line_item.dup
             if line_item.product.is_main?
-              line_item.product = line_item.variant.initial_product
+              new_line_item.product = line_item.variant.initial_product
             end
             new_order.line_items << new_line_item
           end          
