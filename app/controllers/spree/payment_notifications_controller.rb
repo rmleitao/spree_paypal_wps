@@ -137,6 +137,7 @@ module Spree
               the_variant = Spree::Variant.find_by_sku(line_item.variant.initial_product.sku)
               logger.info "the_variant: #{the_variant}"
               new_line_item.variant = the_variant
+              new_line_item.price = the_variant.price
               logger.info "new_line_item.variant: #{new_line_item.variant.id.to_s}"
             end
             new_order.line_items << new_line_item
