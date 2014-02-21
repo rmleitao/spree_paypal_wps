@@ -127,19 +127,13 @@ module Spree
         # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
         # after the trial period. So we should add that specific product to the order.
         if BigDecimal.new(params[:mc_gross]) > @order.total
-          taxon = Spree::Taxon.find_by_name!("Initial")
-          @products = taxon.products.sort_by! {|u| u.price}
-          # logger.debug "RML trial I'm in!"
-          # Spree::Adjustment.create(
-          #   :label => "Pagamento inicial",
-          #   :adjustable => new_order,
-          #   :source => new_order,
-          #   :order => new_order,
-          #   :amount => BigDecimal.new(params[:mc_gross]) - new_order.total,
-          #   :mandatory => true,
-          #   :eligible => true,
-          #   :included => true
-          # )
+          new_order.line_items.each do |line_item|
+            new_line_item = line_item.dup
+            if line_item.product.is_main?
+              line_item.product = line_item.variant.initial_product
+            end
+            new_order.line_items << new_line_item
+          end          
         else
           # normal case, just copy the original order line items
           @order.line_items.each do |line_item|
