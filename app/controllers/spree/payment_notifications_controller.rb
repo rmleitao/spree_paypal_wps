@@ -338,7 +338,7 @@ module Spree
               :amt => @order.credit_transaction.amount,
               :transactionid => params[:txn_id]
             }
-            logger.info "PayPal IPN info [subscr_payment]: Processing partial refund of #{new_order.credit_transaction.amount}."
+            logger.info "PayPal IPN info [subscr_payment]: Processing partial refund of #{@order.credit_transaction.amount}."
           end
 
           p = PaypalNVP.new(payment_method.preferred_test_mode)
