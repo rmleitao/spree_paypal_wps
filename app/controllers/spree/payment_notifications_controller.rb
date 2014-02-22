@@ -318,6 +318,34 @@ module Spree
           end
         end
 
+        # when the order is completed, a trigger will automatically be called to consume user credits.
+        # fetch that amount and refund in paypal.
+        if !@order.credit_transaction.nil?
+          logger.info "PayPal IPN info [subscr_payment]: Consumed user credits. Started PayPal refund processing."
+          if @order.credit_transaction.amount >= @payment.amount
+            data = {
+              :version => "109.0",
+              :method => "RefundTransaction",
+              :refundtype => "Full",
+              :transactionid => params[:txn_id]
+            }
+            logger.info "PayPal IPN info [subscr_payment]: Processing full refund."
+          else
+            data = {
+              :version => "109.0",
+              :method => "RefundTransaction",
+              :refundtype => "Partial",
+              :amt => @order.credit_transaction.amount,
+              :transactionid => params[:txn_id]
+            }
+            logger.info "PayPal IPN info [subscr_payment]: Processing partial refund of #{new_order.credit_transaction.amount}."
+          end
+
+          p = PaypalNVP.new(payment_method.preferred_test_mode)
+          result = p.call_paypal(data)
+          logger.info "PayPal IPN info [subscr_payment] NVP Refund response: #{result}"
+        end
+
       end
       
       render :nothing => true
