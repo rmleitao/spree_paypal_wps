@@ -2,7 +2,7 @@ module Spree
   class PaymentNotificationsController < BaseController
     protect_from_forgery :except => [:create]
     skip_before_filter :restriction_access
-    
+
     def create
       payment_method = Spree::BillingIntegration::PaypalWebsiteStandard.first
       if(payment_method.preferred_encryption && (params[:secret] != payment_method.preferred_ipn_secret))
@@ -32,7 +32,7 @@ module Spree
         # create a subscription object, attach the original order to it.
         # when we redirect the user to paypal, we are sending order.number in the invoice field.
         # when paypal notifies that a subscription has been created, it sends that order number in the invoice field.
-        # it also sends its internal subscription_id, which we should use, 
+        # it also sends its internal subscription_id, which we should use,
         # given that every subsquent payment will use that subscription_id to identify it.
         @order = Spree::Order.find_by_number(params[:invoice])
         if @order.nil?
@@ -49,7 +49,7 @@ module Spree
         )
 
         # Check if the user has previous subscriptions. if so, we should cancel them.
-        # Important: there is an IPN for subscription cancelling. From my tests this doesn't conflict because apparently, 
+        # Important: there is an IPN for subscription cancelling. From my tests this doesn't conflict because apparently,
         # when a subscription is cancelled via API call, as we're doing here, no IPN is triggered, so we will not be cancelling
         # the previous subscription twice.
         @order.user.subscriptions.with_state("ongoing").each do |subscription|
@@ -152,7 +152,7 @@ module Spree
 
         # clone its shipment
         @order.shipments.each do |shipment|
-          new_shipment = shipment.dup
+          new_shipment = shipment.amoeba_dup
           new_order.shipments << new_shipment
         end
 
@@ -275,7 +275,7 @@ module Spree
           :order_id => @order.id,
           :status => params[:payment_status],
           :transaction_id => params[:txn_id])
-        
+
         # load the payment object; should have been created when order transitioned to "payment"
         existing_payment = @order.payments.find_by_identifier(params[:custom])
         if existing_payment.nil?
@@ -347,10 +347,10 @@ module Spree
         end
 
       end
-      
+
       render :nothing => true
     end
-    
+
     private
 
     # those methods are copy-pasted from CheckoutController
@@ -360,28 +360,28 @@ module Spree
       method_name = :"#{before_or_after}_#{@order.state}"
       send(method_name) if respond_to?(method_name, true)
     end
-    
+
     def before_address
       @order.bill_address ||= Address.new(:country => default_country)
       @order.ship_address ||= Address.new(:country => default_country)
     end
-    
+
     def before_delivery
       @order.shipping_method ||= (@order.rate_hash.first && @order.rate_hash.first[:shipping_method])
     end
-    
+
     def before_payment
       current_order.payments.destroy_all if request.put?
     end
-    
+
 		#This isn't working here in payment_nofitications_controller since IPN will run on a different session
     def after_complete
       session[:order_id] = nil
     end
-    
+
     def default_country
       Country.find Spree::BillingIntegration::PaypalWebsiteStandard::Config.default_country_id
     end
-    
+
   end
 end
