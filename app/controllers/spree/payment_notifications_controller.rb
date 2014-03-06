@@ -156,7 +156,7 @@ module Spree
             shipment.inventory_units.each do |inventory_unit|
               new_inventory_unit = inventory_unit.dup
               new_inventory_unit.order = new_order
-              new_shipment << new_inventory_unit
+              new_shipment.inventory_units << new_inventory_unit
             end
           new_order.shipments << new_shipment
         end
