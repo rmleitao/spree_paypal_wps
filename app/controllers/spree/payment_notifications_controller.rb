@@ -152,7 +152,12 @@ module Spree
 
         # clone its shipment
         @order.shipments.each do |shipment|
-          new_shipment = shipment.amoeba_dup
+          new_shipment = shipment.dup
+            shipment.inventory_units.each do |inventory_unit|
+              new_inventory_unit = inventory_unit.dup
+              new_inventory_unit.order = new_order
+              new_shipment << new_inventory_unit
+            end
           new_order.shipments << new_shipment
         end
 
