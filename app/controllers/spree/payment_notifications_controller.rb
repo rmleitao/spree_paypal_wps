@@ -116,12 +116,11 @@ module Spree
         @payment.amount = BigDecimal.new(params[:mc_gross])
         @payment.payment_method = Spree::Order.paypal_payment_method
 
-        # un-cancel the original order
-        @order.resume
-        @order.update_attribute(:shipment_state, nil)
-
         # create a new order, cloning the original one.
         new_order = @order.dup
+        new_order.update_attribute(:state, "payment")
+        new_order.update_attribute(:shipment_state, nil)
+        new_order.update_attribute(:completed_at, nil)
         @payment.order = new_order
         @payment.save
 
