@@ -123,6 +123,17 @@ module Spree
 
         @subscription.orders << new_order
 
+        # clone its shipment
+        @order.shipments.each do |shipment|
+          new_shipment = shipment.dup
+            shipment.inventory_units.each do |inventory_unit|
+              new_inventory_unit = inventory_unit.dup
+              new_inventory_unit.order = new_order
+              new_shipment.inventory_units << new_inventory_unit
+            end
+          new_order.shipments << new_shipment
+        end
+
         # clone its line_items
         # Edge case: products with trial periods. first payment might not be the same amount as the regular payments which occur
         # after the trial period. So we should add that specific product to the order.
@@ -148,17 +159,6 @@ module Spree
         @order.adjustments.each do |adjustment|
           new_adjustment = adjustment.dup
           new_order.adjustments << new_adjustment
-        end
-
-        # clone its shipment
-        @order.shipments.each do |shipment|
-          new_shipment = shipment.dup
-            shipment.inventory_units.each do |inventory_unit|
-              new_inventory_unit = inventory_unit.dup
-              new_inventory_unit.order = new_order
-              new_shipment.inventory_units << new_inventory_unit
-            end
-          new_order.shipments << new_shipment
         end
 
         # add the transaction_id to the new order, so we know what generated it.
@@ -238,7 +238,7 @@ module Spree
 
         Spree::PaymentNotification.create!(
           :params => params,
-          :order_id => @order.id,
+          :order_id => nil,
           :status => "subscription_created",
           :transaction_id => nil
         )
