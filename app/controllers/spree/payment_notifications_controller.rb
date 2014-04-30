@@ -118,6 +118,7 @@ module Spree
 
         # create a new order, cloning the original one.
         new_order = @order.dup
+        new_order.number = new_order.number + "-#{(@subscription.orders.size + 1).to_s}"
         new_order.update_attribute(:state, "payment")
         new_order.update_attribute(:shipment_state, nil)
         new_order.update_attribute(:completed_at, nil)
@@ -131,6 +132,7 @@ module Spree
           new_shipment = shipment.dup
             shipment.inventory_units.each do |inventory_unit|
               new_inventory_unit = inventory_unit.dup
+              # new_inventory_unit.variant    = trial_product if new_inventory_unit.variant.initial_product
               new_inventory_unit.order = new_order
               new_shipment.inventory_units << new_inventory_unit
             end
